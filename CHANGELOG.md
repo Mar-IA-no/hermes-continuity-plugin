@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.1] — 2026-04-25
+
+HERMES_PLATFORM env-var fallback when host runtime does not pass `platform` kwarg to the hooks. Required for use cases like `hermes chat -q` (hardcodes `platform="cli"`) when the same agent process serves multiple platforms.
+
+### Added
+
+- New helper `_resolve_platform(provided)` returns the explicit kwarg if truthy, else falls back to `os.environ.get("HERMES_PLATFORM")`. Lets the same agent process serve different platforms by setting HERMES_PLATFORM before each invocation.
+- `_on_post_llm_call` and `_on_pre_llm_call` apply this resolution at the start of their try block, so all downstream behavior (path resolution, tail read/write) honors the env override.
+
+### Backwards compatibility
+
+- When the kwarg is provided AND truthy, it wins over the env var. No behavior change for hosts that already pass platform explicitly (gateways, etc).
+- When neither kwarg nor env is set, resolves to `""` → legacy file (same as v1.1.0 default).
+
+
 ## [1.1.0] — 2026-04-24
 
 Per-platform working memory. Same agent can live in multiple channels (CLI, Telegram, Minecraft, Discord) simultaneously without contaminating the working memory of one channel with turns from another.
