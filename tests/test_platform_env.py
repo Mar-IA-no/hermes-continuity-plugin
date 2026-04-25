@@ -74,6 +74,32 @@ def test_setup_J_no_kwarg_no_env_uses_legacy(tmp_path, monkeypatch):
     assert legacy.exists(), "should write to legacy when no kwarg and no env"
 
 
+def test_setup_L_cli_kwarg_replaceable_by_env(tmp_path, monkeypatch):
+    """L: kwarg='cli' + HERMES_PLATFORM=minecraft → minecraft wins.
+    This is the v1.1.2 fix for hermes CLI which always passes platform='cli'."""
+    m = _load(tmp_path, monkeypatch)
+    monkeypatch.setenv("HERMES_PLATFORM", "minecraft")
+    m._on_post_llm_call(session_id="env-l", platform="cli", **_substantive("L"))
+    minecraft = tmp_path / "DIALOGUE-HANDOFF.minecraft.md"
+    legacy = tmp_path / "DIALOGUE-HANDOFF.md"
+    assert minecraft.exists(), "platform='cli' should be replaceable by HERMES_PLATFORM"
+    assert "L_USER" in minecraft.read_text()
+    assert not legacy.exists(), "should NOT write legacy when env overrides cli"
+
+
+def test_setup_M_explicit_non_cli_kwarg_still_wins(tmp_path, monkeypatch):
+    """M: kwarg='telegram' + HERMES_PLATFORM=minecraft → telegram wins.
+    The v1.1.2 fix only treats literal 'cli' as replaceable; gateways that
+    pass platform=telegram/discord/etc keep winning over env."""
+    m = _load(tmp_path, monkeypatch)
+    monkeypatch.setenv("HERMES_PLATFORM", "minecraft")
+    m._on_post_llm_call(session_id="env-m", platform="telegram", **_substantive("M"))
+    telegram = tmp_path / "DIALOGUE-HANDOFF.telegram.md"
+    minecraft = tmp_path / "DIALOGUE-HANDOFF.minecraft.md"
+    assert telegram.exists(), "explicit non-cli kwarg should still win over env"
+    assert not minecraft.exists()
+
+
 def test_setup_K_pre_llm_call_uses_env(tmp_path, monkeypatch):
     """K: pre_llm_call honors HERMES_PLATFORM env when kwarg empty."""
     m = _load(tmp_path, monkeypatch)
