@@ -2,7 +2,9 @@
 
 Working memory for Hermes Agent.
 
-> Latest: [`v1.1.2`](../../releases/tag/v1.1.2) · License: [MIT](LICENSE) · Hermes Agent v0.10+
+[![release](https://img.shields.io/github/v/tag/Mar-IA-no/hermes-continuity-plugin?label=release&style=flat&color=blue)](https://github.com/Mar-IA-no/hermes-continuity-plugin/releases)
+[![license](https://img.shields.io/github/license/Mar-IA-no/hermes-continuity-plugin?style=flat&color=success)](LICENSE)
+[![hermes-agent](https://img.shields.io/badge/Hermes_Agent-v0.10%2B-9cf?style=flat)](https://github.com/NousResearch/hermes-agent)
 
 This plugin exists for the moment right after an interruption, when the model wakes up again and the operator assumes continuity, but the process itself has no lived sense of “where we were”.
 
@@ -309,6 +311,36 @@ This is useful if you are migrating a live deploy and want the first non-CLI pla
 ---
 
 ## How the Hooks Behave
+
+The plugin runs on two hooks of the Hermes plugin loader. The whole continuity cycle compresses to this:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Operator
+    participant H as Hermes Agent
+    participant P as continuity-plugin
+    participant F as DIALOGUE-HANDOFF.*.md
+
+    note over U,F: Session N — running
+    U->>H: message
+    H-->>U: response
+    H->>P: post_llm_call(turn)
+    alt substantive turn
+        P->>F: refresh handoff tail
+    else trivial echo
+        P->>P: skip — keep prior handoff
+    end
+
+    note over U,F: ⏸  process restart or time passes
+
+    note over U,F: Session N+1 — fresh
+    U->>H: first message
+    H->>P: pre_llm_call (first turn only)
+    P->>F: read handoff
+    P-->>H: inject as previous_session_context
+    H-->>U: response — picks up the thread
+```
 
 ### `post_llm_call`
 
