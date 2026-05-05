@@ -2,6 +2,8 @@
 
 Working memory for Hermes Agent.
 
+> Latest: [`v1.1.2`](../../releases/tag/v1.1.2) · License: [MIT](LICENSE) · Hermes Agent v0.10+
+
 This plugin exists for the moment right after an interruption, when the model wakes up again and the operator assumes continuity, but the process itself has no lived sense of “where we were”.
 
 That is the hole this repo fills.
@@ -40,6 +42,8 @@ And it does that in a way that works not only for one chat window, but for agent
 - [Compatibility](#compatibility)
 - [What This Plugin Does Not Try to Do](#what-this-plugin-does-not-try-to-do)
 - [Related Repos](#related-repos)
+- [Repo Map](#repo-map)
+- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -431,6 +435,36 @@ Additional docs in this repo:
 
 - [`docs/dialogue-handoff.md`](./docs/dialogue-handoff.md)
 - [`docs/architecture.md`](./docs/architecture.md)
+
+---
+
+## Repo Map
+
+| Path | Role |
+|---|---|
+| `plugin/__init__.py` | hook implementation (`post_llm_call`, `pre_llm_call`) |
+| `plugin/plugin.yaml` | manifest declaring hooks for Hermes' plugin loader |
+| `templates/` | example continuity files (`ALWAYS-CONTEXT.plugin.md`, `DIALOGUE-HANDOFF.md`) |
+| `tests/` | pytest suite — substantive gate, multi-line preservation, per-platform, env cascade |
+| `install.sh` | standalone installer for users not using `hermes-memory-kit` |
+| `docs/` | deeper notes on dialogue handoff and architecture |
+
+---
+
+## Contributing
+
+Issues and PRs are welcome.
+
+The bar for changes here is narrow on purpose:
+
+- does it preserve the conversational thread better across interruption?
+- does it keep working memory cleanly separated from long-term memory?
+- does it avoid contaminating one platform's continuity with another's?
+- does it keep the on-disk format inspectable by hand?
+
+If you change the hook contract or the persistence format, run the test
+suite and verify the behavior in a real Hermes workspace before opening
+a PR.
 
 ---
 
