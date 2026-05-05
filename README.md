@@ -320,7 +320,7 @@ sequenceDiagram
     participant U as Operator
     participant H as Hermes Agent
     participant P as continuity-plugin
-    participant F as DIALOGUE-HANDOFF.*.md
+    participant F as "DIALOGUE-HANDOFF.*.md"
 
     note over U,F: Session N — running
     U->>H: message
